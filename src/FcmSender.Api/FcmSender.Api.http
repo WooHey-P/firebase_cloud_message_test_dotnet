@@ -1,0 +1,6 @@
+@FcmSender.Api_HostAddress = http://localhost:5130
+
+GET {{FcmSender.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
