@@ -34,6 +34,18 @@ public sealed class FcmMessageFactory : IFcmMessageFactory
             message.Data = new Dictionary<string, string>(request.Data, StringComparer.Ordinal);
         }
 
+        // Apply Android-specific configuration
+        if (request.Android is not null)
+        {
+            message.Android = BuildAndroidConfig(request.Android);
+        }
+
+        // Apply APNs-specific configuration
+        if (request.Apns is not null)
+        {
+            message.Apns = BuildApnsConfig(request.Apns);
+        }
+
         var (targetType, targetValue) = ResolveTarget(request, defaultDeviceToken);
 
         switch (targetType)
@@ -52,6 +64,63 @@ public sealed class FcmMessageFactory : IFcmMessageFactory
         }
 
         return message;
+    }
+
+    private static AndroidConfig BuildAndroidConfig(FcmAndroidConfig config)
+    {
+        var androidConfig = new AndroidConfig();
+
+        if (!string.IsNullOrWhiteSpace(config.Priority))
+        {
+            androidConfig.Priority = config.Priority.ToUpperInvariant();
+        }
+
+        if (!string.IsNullOrWhiteSpace(config.Ttl))
+        {
+            androidConfig.Ttl = config.Ttl;
+        }
+
+        return androidConfig;
+    }
+
+    private static ApnsConfig BuildApnsConfig(FcmApnsConfig config)
+    {
+        var apnsConfig = new ApnsConfig();
+
+        if (config.Headers is not null)
+        {
+            apnsConfig.Headers = new Dictionary<string, string>();
+
+            if (!string.IsNullOrWhiteSpace(config.Headers.ApnsPriority))
+            {
+                apnsConfig.Headers["apns-priority"] = config.Headers.ApnsPriority;
+            }
+
+            if (!string.IsNullOrWhiteSpace(config.Headers.ApnsExpiration))
+            {
+                apnsConfig.Headers["apns-expiration"] = config.Headers.ApnsExpiration;
+            }
+        }
+
+        if (config.Payload?.Aps is not null)
+        {
+            var apsDict = new Dictionary<string, object>();
+
+            if (config.Payload.Aps.ContentAvailable.HasValue)
+            {
+                apsDict["content-available"] = config.Payload.Aps.ContentAvailable.Value;
+            }
+
+            if (apsDict.Count > 0)
+            {
+                apnsConfig.Payload = new Dictionary<string, object>
+                {
+                    ["aps"] = apsDict
+                };
+            }
+        }
+
+        return apnsConfig;
     }
 
     private static (MessageTargetType Type, string Value) ResolveTarget(FcmNotificationRequest request, string? defaultDeviceToken)
