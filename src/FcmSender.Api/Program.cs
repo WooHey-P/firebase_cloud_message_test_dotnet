@@ -1,9 +1,9 @@
+using System.Text.Json;
 using DotNetEnv;
 using FcmSender.Api.Endpoints;
 using FcmSender.Core.Abstractions;
 using FcmSender.Core.Options;
 using FcmSender.Core.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 TryLoadDotEnv();
@@ -74,6 +74,12 @@ static void MapFirebaseEnvironmentVariables(IConfigurationManager configuration)
     var projectId = Environment.GetEnvironmentVariable("FIREBASE_PROJECTID");
     var defaultDeviceToken = Environment.GetEnvironmentVariable("FIREBASE_DEFAULTDEVICETOKEN");
 
+    // ProjectId가 환경 변수에 없으면 서비스 계정 JSON에서 추출
+    if (string.IsNullOrWhiteSpace(projectId))
+    {
+        projectId = TryExtractProjectIdFromServiceAccount(configuration);
+    }
+
     if (!string.IsNullOrWhiteSpace(projectId))
     {
         configuration[$"{FirebaseOptions.SectionName}:ProjectId"] = projectId;
@@ -83,4 +89,41 @@ static void MapFirebaseEnvironmentVariables(IConfigurationManager configuration)
     {
         configuration[$"{FirebaseOptions.SectionName}:DefaultDeviceToken"] = defaultDeviceToken;
     }
+}
+
+static string? TryExtractProjectIdFromServiceAccount(IConfiguration configuration)
+{
+    try
+    {
+        // 서비스 계정 JSON 파일 경로 확인
+        var credentialFilePath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS")
+            ?? configuration["Firebase:Credentials:FilePath"];
+
+        if (string.IsNullOrWhiteSpace(credentialFilePath))
+        {
+            return null;
+        }
+
+        var absolutePath = Path.GetFullPath(credentialFilePath);
+
+        if (!File.Exists(absolutePath))
+        {
+            return null;
+        }
+
+        // JSON 파일에서 project_id 추출
+        var jsonContent = File.ReadAllText(absolutePath);
+        using var jsonDoc = JsonDocument.Parse(jsonContent);
+
+        if (jsonDoc.RootElement.TryGetProperty("project_id", out var projectIdElement))
+        {
+            return projectIdElement.GetString();
+        }
+    }
+    catch
+    {
+        // 에러 발생 시 null 반환 (나중에 검증 단계에서 오류 처리)
+    }
+
+    return null;
 }

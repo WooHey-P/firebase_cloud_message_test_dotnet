@@ -21,7 +21,6 @@ cd firebase_cloud_message_test_for_dotnet
 
 The script will guide you through:
 
-- Entering your Firebase Project ID
 - Specifying the service account JSON filename
 - Automatically generating the `.env` file
 
@@ -45,19 +44,14 @@ Open `http://localhost:5130/swagger` in your browser
 3. Click **Generate new private key**
 4. Save the downloaded JSON file to `secrets/` folder
 
-### Find Your Project ID
-
-Firebase Console > Project Settings > **General** tab
-
-> **Note**: Project ID looks like `my-app-12345`. It's NOT the App ID like `1:793178809063:android:...`
-
 ## Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `FIREBASE_PROJECTID` | Yes | Firebase Project ID |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Yes | Path to service account JSON |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Yes | Path to service account JSON (project_id is auto-extracted) |
 | `FIREBASE_DEFAULTDEVICETOKEN` | No | Default FCM device token |
+
+> **Note**: The `project_id` is automatically extracted from the service account JSON file, so you don't need to set it separately.
 
 ## API Usage
 

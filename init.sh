@@ -14,15 +14,6 @@ if [ -f ".env" ]; then
     fi
 fi
 
-# Firebase 프로젝트 ID 입력
-echo ""
-read -p "Firebase 프로젝트 ID를 입력하세요: " project_id
-
-if [ -z "$project_id" ]; then
-    echo "오류: 프로젝트 ID는 필수입니다."
-    exit 1
-fi
-
 # 서비스 계정 JSON 파일명 입력
 echo ""
 echo "서비스 계정 JSON 파일명을 입력하세요."
@@ -53,7 +44,6 @@ read -p "기본 FCM 디바이스 토큰 (선택, Enter로 건너뛰기): " defau
 
 # .env 파일 생성
 cat > .env << EOF
-FIREBASE_PROJECTID=$project_id
 GOOGLE_APPLICATION_CREDENTIALS=../../secrets/$service_account_filename
 FIREBASE_DEFAULTDEVICETOKEN=$default_token
 EOF

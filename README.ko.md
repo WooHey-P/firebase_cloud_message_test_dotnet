@@ -21,7 +21,6 @@ cd firebase_cloud_message_test_for_dotnet
 
 스크립트가 다음을 안내합니다:
 
-- Firebase 프로젝트 ID 입력
 - 서비스 계정 JSON 파일명 입력
 - `.env` 파일 자동 생성
 
@@ -45,19 +44,14 @@ dotnet run --project src/FcmSender.Api
 3. **새 비공개 키 생성** 클릭
 4. 다운로드된 JSON 파일을 `secrets/` 폴더에 저장
 
-### 프로젝트 ID 확인
-
-Firebase Console > 프로젝트 설정 > **일반** 탭에서 확인
-
-> **주의**: 프로젝트 ID는 `my-app-12345` 형식입니다. `1:793178809063:android:...` 같은 앱 ID와 다릅니다.
-
 ## 환경 변수
 
 | 변수 | 필수 | 설명 |
 |------|------|------|
-| `FIREBASE_PROJECTID` | O | Firebase 프로젝트 ID |
-| `GOOGLE_APPLICATION_CREDENTIALS` | O | 서비스 계정 JSON 경로 |
+| `GOOGLE_APPLICATION_CREDENTIALS` | O | 서비스 계정 JSON 경로 (project_id는 자동 추출됨) |
 | `FIREBASE_DEFAULTDEVICETOKEN` | X | 기본 FCM 토큰 |
+
+> **참고**: `project_id`는 서비스 계정 JSON 파일에서 자동으로 추출되므로 별도로 설정할 필요가 없습니다.
 
 ## API 사용법
 
